@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [dev]
+    branches: [main]
   pull_request:
-    branches: [dev]
+    branches: [main]
 
 jobs:
   frontend-ci:
@@ -40,5 +40,4 @@ jobs:
           cache-dependency-path: backend/requirements.txt
 
       - run: pip install -r requirements.txt
-      - run: pip install pytest
-      - run: python -m pytest --no-header -q || true
+      - run: python -m pytest --no-header -q
