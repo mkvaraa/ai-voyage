@@ -1,10 +1,25 @@
+import asyncio
 import json
+import logging
 import os
 
 from app.models.schemas import RouteResponse, TripRequest
+from fastapi import HTTPException
 from google import genai
+from google.api_core import exceptions as google_exceptions
 from google.genai import types
 from pydantic import ValidationError
+
+logger = logging.getLogger(__name__)
+
+_RETRYABLE_EXCEPTIONS = (
+    google_exceptions.DeadlineExceeded,
+    google_exceptions.ServiceUnavailable,
+    google_exceptions.ResourceExhausted,
+)
+_MAX_ATTEMPTS = 3
+_BACKOFF_SECONDS = (1, 2, 4)
+_GEMINI_TIMEOUT_MS = 30_000
 
 SYSTEM_PROMPT = """You are a travel route planner. Return ONLY valid JSON matching this schema exactly — no markdown, no explanation, no extra keys:
 
@@ -78,17 +93,42 @@ async def generate_route(request: TripRequest) -> RouteResponse:
         f"Interests: {', '.join(request.interests)}."
     )
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=user_prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            response_mime_type="application/json",
-            temperature=0.7,
-            max_output_tokens=2000,
-            thinking_config=types.ThinkingConfig(thinking_budget=0),
-        ),
+    config = types.GenerateContentConfig(
+        system_instruction=SYSTEM_PROMPT,
+        response_mime_type="application/json",
+        temperature=0.7,
+        max_output_tokens=2000,
+        thinking_config=types.ThinkingConfig(thinking_budget=0),
+        http_options=types.HttpOptions(timeout=_GEMINI_TIMEOUT_MS),
     )
+
+    response = None
+    for attempt in range(_MAX_ATTEMPTS):
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=user_prompt,
+                config=config,
+            )
+            break
+        except _RETRYABLE_EXCEPTIONS as e:
+            if attempt == _MAX_ATTEMPTS - 1:
+                logger.error(
+                    "Gemini API failed after %d attempts: %s", _MAX_ATTEMPTS, e
+                )
+                raise HTTPException(
+                    status_code=503,
+                    detail="AI service unavailable, please try again",
+                ) from e
+            delay = _BACKOFF_SECONDS[attempt]
+            logger.warning(
+                "Gemini API call failed (attempt %d/%d): %s. Retrying in %ds.",
+                attempt + 1,
+                _MAX_ATTEMPTS,
+                e,
+                delay,
+            )
+            await asyncio.sleep(delay)
 
     text = response.text
     if not text:
