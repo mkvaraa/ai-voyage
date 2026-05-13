@@ -4,5 +4,6 @@ pydantic
 python-dotenv
 aiosqlite
 google-genai>=0.3.0
+google-api-core
 pytest
 pytest-asyncio
