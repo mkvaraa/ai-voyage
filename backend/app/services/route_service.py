@@ -57,6 +57,19 @@ Rules:
 """
 
 
+def extract_json(raw: str) -> str:
+    """Strip markdown code fences that Gemini sometimes wraps JSON in."""
+    cleaned = raw.strip()
+    if cleaned.startswith("```json") or cleaned.startswith("```"):
+        lines = cleaned.splitlines()
+        if len(lines) >= 2 and lines[-1].strip().startswith("```"):
+            lines = lines[1:-1]
+        else:
+            lines = lines[1:]
+        cleaned = "\n".join(lines).strip()
+    return cleaned
+
+
 def _ensure_stop_ids(parsed: dict) -> dict:
     """Auto-generate stop IDs if Gemini forgot them.
 
@@ -151,7 +164,7 @@ async def generate_route(request: TripRequest) -> RouteResponse:
         )
 
     try:
-        parsed = json.loads(text)
+        parsed = json.loads(extract_json(text))
     except json.JSONDecodeError as e:
         raise ValueError(f"Gemini returned invalid JSON: {e}") from e
 
