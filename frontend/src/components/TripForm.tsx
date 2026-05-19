@@ -3,9 +3,9 @@ import { Controller, useForm, useWatch, type DefaultValues, type Resolver } from
 import { yupResolver } from '@hookform/resolvers/yup';
 import { format, formatISO } from 'date-fns';
 import { CalendarIcon, Loader2, Plus, X } from 'lucide-react';
-import * as yup from 'yup';
 
 import { cn } from '@/lib/utils';
+import { tripSchema, MIN_BUDGET, MAX_BUDGET, type TripFormValues } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,43 +29,7 @@ const PRESET_INTERESTS = new Set<string>(INTEREST_OPTIONS.map((o) => o.value));
 const MAX_INTERESTS = 10;
 const MAX_INTEREST_LENGTH = 40;
 
-const tripSchema = yup.object({
-  destination: yup
-    .string()
-    .trim()
-    .required('Destination is required')
-    .max(120, 'Destination is too long'),
-  startDate: yup.date().typeError('Pick a start date').required('Start date is required'),
-  endDate: yup
-    .date()
-    .typeError('Pick an end date')
-    .required('End date is required')
-    .min(yup.ref('startDate'), 'End date must be on or after the start date'),
-  budget: yup
-    .number()
-    .typeError('Budget must be a number')
-    .required('Budget is required')
-    .min(50, 'Minimum budget is $50')
-    .max(50000, 'Maximum budget is $50,000'),
-  interests: yup
-    .array()
-    .of(
-      yup
-        .string()
-        .trim()
-        .required()
-        .min(1)
-        .max(
-          MAX_INTEREST_LENGTH,
-          `Each interest must be ${MAX_INTEREST_LENGTH} characters or fewer`
-        )
-    )
-    .min(1, 'Pick at least one interest')
-    .max(MAX_INTERESTS, `You can pick up to ${MAX_INTERESTS} interests`)
-    .required('Pick at least one interest'),
-});
-
-export type TripFormValues = yup.InferType<typeof tripSchema>;
+export type { TripFormValues };
 
 export type TripPayload = {
   destination: string;
@@ -77,8 +41,8 @@ export type TripPayload = {
 
 const toPayload = (values: TripFormValues): TripPayload => ({
   destination: values.destination,
-  start_date: formatISO(values.startDate, { representation: 'date' }),
-  end_date: formatISO(values.endDate, { representation: 'date' }),
+  start_date: formatISO(values.start_date, { representation: 'date' }),
+  end_date: formatISO(values.end_date, { representation: 'date' }),
   budget: values.budget,
   interests: values.interests,
 });
@@ -106,7 +70,7 @@ export default function TripForm() {
     mode: 'onTouched',
   });
 
-  const startDate = useWatch({ control, name: 'startDate' });
+  const startDate = useWatch({ control, name: 'start_date' });
 
   const onSubmit = (values: TripFormValues) => {
     const payload = toPayload(values);
@@ -136,7 +100,7 @@ export default function TripForm() {
           <div className="grid gap-5 sm:grid-cols-2">
             <Controller
               control={control}
-              name="startDate"
+              name="start_date"
               render={({ field, fieldState }) => (
                 <Field label="Start date" error={fieldState.error?.message}>
                   <DateField
@@ -151,7 +115,7 @@ export default function TripForm() {
             />
             <Controller
               control={control}
-              name="endDate"
+              name="end_date"
               render={({ field, fieldState }) => (
                 <Field label="End date" error={fieldState.error?.message}>
                   <DateField
@@ -160,7 +124,7 @@ export default function TripForm() {
                     onBlur={field.onBlur}
                     placeholder="Pick end date"
                     invalid={Boolean(fieldState.error)}
-                    disabled={(date) => (startDate ? date < startDate : false)}
+                    disabled={(date) => (startDate ? date <= startDate : false)}
                   />
                 </Field>
               )}
@@ -176,13 +140,13 @@ export default function TripForm() {
                 id={budgetId}
                 type="number"
                 inputMode="numeric"
-                min={50}
-                max={50000}
+                min={MIN_BUDGET}
+                max={MAX_BUDGET}
                 step={50}
                 placeholder="1500"
                 className="pl-6 pr-12"
                 aria-invalid={Boolean(errors.budget)}
-                {...register('budget')}
+                {...register('budget', { valueAsNumber: true })}
               />
               <span className="pointer-events-none absolute inset-y-0 right-2.5 flex items-center text-xs font-medium text-muted-foreground">
                 USD
