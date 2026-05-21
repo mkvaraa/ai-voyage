@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { format, parseISO } from 'date-fns';
 
 import ErrorAlert from '@/components/ErrorAlert';
