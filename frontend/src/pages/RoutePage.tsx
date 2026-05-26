@@ -67,7 +67,7 @@ export default function RoutePage() {
       </div>
 
       <div className="overflow-hidden rounded-lg border">
-        <RouteMap />
+        <RouteMap days={route.days} />
       </div>
     </div>
   );
