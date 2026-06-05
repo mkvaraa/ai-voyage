@@ -18,4 +18,5 @@ async def init_db():
             )
             """
         )
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_routes_slug ON routes(slug)")
         await db.commit()

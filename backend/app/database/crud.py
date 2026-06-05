@@ -17,12 +17,20 @@ async def _insert(slug: str, data: RouteResponse) -> None:
 
 
 async def save_route(data: RouteResponse) -> str:
-    slug = generate(size=8)
-    try:
-        await _insert(slug, data)
-    except IntegrityError:
+    max_attempts = 5
+    for attempt in range(1, max_attempts + 1):
         slug = generate(size=8)
-        await _insert(slug, data)
+        try:
+            await _insert(slug, data)
+            if attempt > 1:
+                print(f"Slug collision, retried {attempt - 1} times")
+            return slug
+        except IntegrityError:
+            continue
+
+    slug = generate(size=12)
+    await _insert(slug, data)
+    print(f"Slug collision, retried {max_attempts} times")
     return slug
 
 
