@@ -11,7 +11,13 @@ services:
       - ai-voyage-net
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+        VITE_USE_MOCK: ${VITE_USE_MOCK:-false}
+        VITE_MAPBOX_TOKEN: ${VITE_MAPBOX_TOKEN}
+        VITE_OPENWEATHER_KEY: ${VITE_OPENWEATHER_KEY}
     ports:
       - '3000:80'
     depends_on:
