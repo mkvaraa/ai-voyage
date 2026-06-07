@@ -209,30 +209,63 @@ export default function RouteMap({ days }: RouteMapProps) {
             latitude={selectedStop.lat}
             longitude={selectedStop.lng}
             anchor="bottom"
-            offset={16}
+            offset={20}
             closeOnClick={false}
             onClose={() => setSelectedStop(null)}
+            maxWidth="320px"
+            className="ai-voyage-popup"
           >
-            <div className="flex max-w-[200px] flex-col gap-1.5 p-1">
-              <h3 className="text-sm font-bold leading-tight">{selectedStop.name}</h3>
+            <div className="flex w-[280px] flex-col gap-2 p-4">
+              <div className="flex items-start gap-2 pr-6">
+                <h3 className="text-base font-semibold leading-tight tracking-tight">
+                  {selectedStop.name}
+                </h3>
+              </div>
               <div>
                 <Badge variant="secondary" className="capitalize">
                   {selectedStop.type}
                 </Badge>
               </div>
-              <p className="text-xs text-foreground">{selectedStop.duration_minutes} min</p>
-              {selectedStop.notes && <p className="text-xs text-gray-500">{selectedStop.notes}</p>}
+              <p className="text-xs text-muted-foreground">{selectedStop.duration_minutes} min</p>
+              {selectedStop.notes && (
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  {selectedStop.notes}
+                </p>
+              )}
               <WeatherBadge lat={selectedStop.lat} lng={selectedStop.lng} />
-              {selectedStop.booking_url && (
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                {selectedStop.booking_url && (
+                  <a
+                    href={selectedStop.booking_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex w-fit items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-sm transition hover:opacity-90"
+                  >
+                    Book now
+                  </a>
+                )}
                 <a
-                  href={selectedStop.booking_url}
+                  href={`https://www.google.com/maps/search/?api=1&query=${selectedStop.lat},${selectedStop.lng}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-blue-600 underline hover:text-blue-700"
+                  className="inline-flex w-fit items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
                 >
-                  Book now
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="h-3.5 w-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  Google Maps
                 </a>
-              )}
+              </div>
             </div>
           </Popup>
         )}
