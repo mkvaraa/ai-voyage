@@ -5,7 +5,9 @@ import mapboxgl from 'mapbox-gl';
 import Map, { Layer, Marker, Popup, Source, useMap } from 'react-map-gl';
 import type { FeatureCollection, LineString } from 'geojson';
 
+import LoadingSkeleton from '@/components/LoadingSkeleton';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useWeather } from '@/hooks/useWeather';
 import type { Day, Stop } from '@/types/route';
 
@@ -15,8 +17,8 @@ function WeatherBadge({ lat, lng }: { lat: number; lng: number }) {
   if (isLoading) {
     return (
       <div className="flex items-center gap-2">
-        <div className="h-6 w-6 animate-pulse rounded bg-gray-200" />
-        <div className="h-3 w-16 animate-pulse rounded bg-gray-200" />
+        <Skeleton className="h-6 w-6" />
+        <Skeleton className="h-3 w-16" />
       </div>
     );
   }
@@ -115,6 +117,7 @@ function FitBoundsToStops({ stops }: { stops: Stop[] }) {
 
 export default function RouteMap({ days }: RouteMapProps) {
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   const stops = useMemo<Stop[]>(() => days.flatMap((day) => day.stops), [days]);
 
@@ -165,6 +168,7 @@ export default function RouteMap({ days }: RouteMapProps) {
         }}
         style={{ width: '100%', height: '100%' }}
         mapStyle="mapbox://styles/mapbox/streets-v12"
+        onLoad={() => setMapLoaded(true)}
       >
         <FitBoundsToStops stops={stops} />
 
@@ -270,6 +274,12 @@ export default function RouteMap({ days }: RouteMapProps) {
           </Popup>
         )}
       </Map>
+
+      {!mapLoaded && (
+        <div className="pointer-events-none absolute inset-0 z-20">
+          <LoadingSkeleton variant="map" className="h-full" />
+        </div>
+      )}
 
       {presentCategories.length > 0 && (
         <div className="pointer-events-none absolute bottom-3 left-3 z-10 rounded-md border bg-white/90 px-3 py-2 text-xs shadow-md backdrop-blur-sm">

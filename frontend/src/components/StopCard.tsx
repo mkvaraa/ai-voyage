@@ -1,5 +1,6 @@
-import { Clock, ExternalLink, Loader2, MapPin, RefreshCw } from 'lucide-react';
+import { Clock, ExternalLink, MapPin, RefreshCw } from 'lucide-react';
 
+import LoadingSkeleton from '@/components/LoadingSkeleton';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -41,43 +42,14 @@ export type StopCardProps = {
 };
 
 export default function StopCard({ stop, className, onReplace, isReplacing }: StopCardProps) {
-  if (stop.type === 'loading') {
-    return (
-      <Card
-        className={cn('group relative overflow-hidden', className)}
-        aria-busy="true"
-        aria-live="polite"
-      >
-        <CardContent className="flex flex-col gap-3 p-3 sm:p-4">
-          <div className="flex animate-pulse flex-col gap-3">
-            <div className="h-4 w-2/3 rounded bg-muted" />
-            <div className="flex items-center gap-2">
-              <div className="h-5 w-16 rounded-full bg-muted" />
-              <div className="h-3 w-12 rounded bg-muted" />
-              <div className="h-3 w-20 rounded bg-muted" />
-            </div>
-            <div className="h-3 w-full rounded bg-muted" />
-            <div className="h-3 w-5/6 rounded bg-muted" />
-          </div>
-          <span className="sr-only">{stop.name || 'Finding alternative...'}</span>
-        </CardContent>
-      </Card>
-    );
+  if (stop.type === 'loading' || isReplacing) {
+    return <LoadingSkeleton variant="stop" className={className} />;
   }
 
   const hasBooking = Boolean(stop.booking_url?.trim());
 
   return (
     <Card className={cn('group relative overflow-hidden', className)}>
-      {isReplacing ? (
-        <div
-          className="absolute inset-0 z-10 flex items-center justify-center bg-background/70 backdrop-blur-sm"
-          aria-live="polite"
-        >
-          <Loader2 aria-hidden="true" className="size-5 animate-spin text-muted-foreground" />
-          <span className="sr-only">Replacing stop…</span>
-        </div>
-      ) : null}
       <CardContent className="flex flex-col gap-2 p-3 sm:gap-3 sm:p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1">

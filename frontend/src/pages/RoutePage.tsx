@@ -48,7 +48,7 @@ export default function RoutePage() {
   if (isPending) {
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-8">
-        <LoadingSkeleton />
+        <LoadingSkeleton variant="route" />
       </div>
     );
   }
@@ -75,7 +75,9 @@ export default function RoutePage() {
         <div className="order-1 flex flex-col lg:order-2 lg:h-full lg:w-2/5 lg:overflow-y-auto">
           <header className="flex flex-col gap-2 border-b bg-background/80 px-4 py-4 backdrop-blur sm:px-6 sm:py-5 lg:sticky lg:top-0 lg:z-10">
             <div className="flex items-start justify-between gap-3">
-              <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">{route.title}</h1>
+              <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
+                {route.title}
+              </h1>
               {slug && <ShareButton slug={slug} />}
             </div>
             <p className="text-sm text-muted-foreground">
