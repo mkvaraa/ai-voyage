@@ -8,6 +8,8 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > **Live demo:** [gleaming-endurance-production-07af.up.railway.app](https://gleaming-endurance-production-07af.up.railway.app)
+>
+> ⚠️ The live demo is hosted on Railway's free trial credits and may be **temporarily offline** to conserve credits. It is brought back up on demand (e.g. for the thesis defense). To run it yourself, follow [Local Setup](#local-setup) below.
 
 AI-powered travel planner that generates personalized itineraries from a few trip details. The frontend is a React + Vite app, the backend is a FastAPI service that calls Google Gemini for itinerary generation, with Mapbox and OpenWeather for maps and forecasts.
 
