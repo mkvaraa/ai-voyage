@@ -3,14 +3,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from app.database.init_db import init_db  # noqa: E402
+from app.errors import validation_exception_handler  # noqa: E402
 from app.routers.health import router as health_router  # noqa: E402
 from app.routers.placeholder import router as placeholder_router  # noqa: E402
 from app.routers.routes import router as routes_router  # noqa: E402
 from fastapi import FastAPI  # noqa: E402
+from fastapi.exceptions import RequestValidationError  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from prometheus_fastapi_instrumentator import Instrumentator  # noqa: E402
 
 app = FastAPI(title="AI-Voyage API")
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
 Instrumentator().instrument(app).expose(app)
 

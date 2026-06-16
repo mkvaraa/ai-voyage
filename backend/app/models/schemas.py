@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class TripRequest(BaseModel):
@@ -10,10 +10,24 @@ class TripRequest(BaseModel):
     budget: float = Field(ge=50, le=50000)
     interests: list[str] = Field(min_length=1)
 
+    @field_validator("destination", mode="before")
+    @classmethod
+    def _destination_present(cls, v):
+        if v is None or (isinstance(v, str) and not v.strip()):
+            raise ValueError("Please enter a destination")
+        return v
+
+    @field_validator("interests", mode="before")
+    @classmethod
+    def _interests_present(cls, v):
+        if v is None or (isinstance(v, list) and len(v) == 0):
+            raise ValueError("Please select at least one interest")
+        return v
+
     @model_validator(mode="after")
     def end_after_start(self):
         if self.end_date <= self.start_date:
-            raise ValueError("end_date must be after start_date")
+            raise ValueError("End date must be after start date")
         return self
 
 

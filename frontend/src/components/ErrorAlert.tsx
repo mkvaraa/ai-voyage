@@ -23,7 +23,7 @@ export default function ErrorAlert({
     <Alert variant="destructive" className={cn('pr-2', className)}>
       <AlertCircle aria-hidden="true" />
       <AlertTitle>{title}</AlertTitle>
-      <AlertDescription>{message}</AlertDescription>
+      <AlertDescription className="whitespace-pre-line">{message}</AlertDescription>
       {onRetry ? (
         <AlertAction>
           <Button

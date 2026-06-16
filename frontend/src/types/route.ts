@@ -52,5 +52,7 @@ export type ValidationErrorItem = {
 };
 
 export type ErrorResponse = {
-  detail: string | ValidationErrorItem[];
+  detail?: string | ValidationErrorItem[];
+  error?: string;
+  details?: string[];
 };
